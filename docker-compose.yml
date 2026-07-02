@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  mining-news:
+    build:
+      context: .
+      dockerfile: servers/mining_news_mcp/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - MCP_TRANSPORT=sse
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(3); s.connect(('localhost',8001)); s.close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  mineral-pdf:
+    build:
+      context: .
+      dockerfile: servers/mineral_pdf_mcp/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - MCP_TRANSPORT=sse
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8002
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(3); s.connect(('localhost',8002)); s.close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  lme-price:
+    build:
+      context: .
+      dockerfile: servers/lme_price_mcp/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - MCP_TRANSPORT=sse
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8003
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(3); s.connect(('localhost',8003)); s.close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    environment:
+      - NEWS_MCP_HOST=mining-news
+      - PDF_MCP_HOST=mineral-pdf
+      - PRICE_MCP_HOST=lme-price
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-placeholder}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o}
+    depends_on:
+      mining-news:
+        condition: service_healthy
+      mineral-pdf:
+        condition: service_healthy
+      lme-price:
+        condition: service_healthy
+    # agent 是一次性运行容器，不设置 restart

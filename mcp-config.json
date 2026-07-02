@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "mining-news": {
+      "command": "python",
+      "args": ["servers/mining_news_mcp/server.py"],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
+    },
+    "mineral-pdf": {
+      "command": "python",
+      "args": ["servers/mineral_pdf_mcp/server.py"],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
+    },
+    "lme-price": {
+      "command": "python",
+      "args": ["servers/lme_price_mcp/server.py"],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  }
+}
